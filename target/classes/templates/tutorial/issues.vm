@@ -1,0 +1,174 @@
+## Страница со списком задач по JQL
+<html>
+<head>
+    <title>$i18n.getText("tl.tutorial.page")</title>
+    <style media="screen" type="text/css">
+        #footer {
+            visibility: hidden;
+        }
+
+        .aui-header-secondary {
+            visibility: hidden;
+        }
+
+        #home_link {
+            visibility: hidden;
+        }
+
+        #create-menu {
+            visibility: hidden;
+        }
+
+        #aui-responsive-header-dropdown-trigger-0 {
+            visibility: hidden;
+        }
+
+        .aui-header-primary {
+            visibility: hidden;
+        }
+
+        #websudo-banner {
+            visibility: hidden;
+        }
+
+        .aui-header-inner {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body style="min-width: 1000px">
+
+## Включаем стандартные зависимости
+
+    $webResourceManager.requireResourcesForContext("com.atlassian.auiplugin:aui-experimental-restfultable")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar-en")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jira-global")
+    $webResourceManager.requireResourcesForContext("jira.webresources:autocomplete")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jqlautocomplete")
+    $webResourceManager.requireResourcesForContext("com.atlassian.auiplugin:aui-sidebar")
+
+<div class="mod-content">
+
+##    Включаем меню слева
+    #parse("/templates/tutorial/sidebar-menu.vm")
+
+    <div class="aui-page-panel">
+        <div class="aui-page-panel-inner">
+            <div class="aui-page-panel-content">
+                <div class="form-body" style="margin-bottom: 20px; margin-top: 20px;">
+                    <h2>$i18n.getText("tl.tutorial.issues")</h2>
+                    <hr/>
+
+##                    Таблица для задач
+                    <table id="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript'>
+    jQuery(document).ready(function () {
+
+//        Заполняем таблицу
+        initTable();
+
+//        Удаляем заголовок и подвал JIRA
+        jQuery(".aui-header-primary").remove();
+        jQuery(".aui-header-secondary").remove();
+        jQuery("#websudo-banner").remove();
+        jQuery(".aui-header-inner").remove();
+    });
+
+    function clickRow(id) {
+        alert("click " + id);
+    }
+
+    function initTable() {
+
+//        Получаем список задач через REST
+        jQuery.ajax({
+            method: "get",
+            dataType: "json",
+
+//            пример передачи параметра
+            data: {param1: 'nothing'},
+
+
+            url: AJS.contextPath() + "/rest/tutorial-rest/latest/tutorial/myitems",
+            success: function (result, textStatus, jqXHR) {
+                var html = "";
+
+//                В цикле строим контент таблицы
+                for (var i = 0; i < result.length; i++) {
+                    html += '<tr title="';
+                    html += result[i].userEmail;
+                    html += '" id="user-tutorial-item-';
+                    html += result[i].id;
+                    html += '" class="record-row"><td class="" style="width: 2%">';
+                    html += '<input type="checkbox" name="tutorial-select-record-';
+                    html += result[i].id;
+                    html += '" id="tutorial-select-record-';
+                    html += result[i].id;
+                    html += '" value="';
+                    html += result[i].id;
+                    html += '" class="tutorial-select-record"></td>';
+                    html += '<td class="normal-cell">';
+
+//                    Значения полей берем из рультата с REST вызова
+                    html += result[i].ts;
+                    html += '</td>';
+                    html += '<td class="normal-cell"><a target="blank" href="';
+                    html += AJS.contextPath();
+                    html += '/browse/';
+                    html += result[i].issueKey;
+                    html += '">[';
+                    html += result[i].issueKey;
+                    html += '] ';
+                    html += result[i].issueSummary;
+                    html += '</a></td>';
+                    html += '<td class="normal-cell">';
+                    html += result[i].userEmail;
+                    html += '</td>';
+
+                    html += '<td class="xsmall-cell">';
+                    html += '<a aria-controls="dropdowna';
+                    html += result[i].id;
+                    html += '-more" aria-haspopup="true" aria-owns="dropdowna';
+                    html += result[i].id;
+                    html += '-more"';
+                    html += 'href="#dropdowna';
+                    html += result[i].id;
+                    html += '-more"';
+                    html += 'class="aui-icon aui-icon-small aui-iconfont-configure aui-dropdown2-trigger">Actions';
+                    html += '</a>';
+
+
+                    html += '<div data-dropdown2-alignment="left" aria-hidden="true" style="display: none; top: 604px; left: 30px;"';
+                    html += 'class="aui-dropdown2 aui-style-default" id="dropdowna';
+                    html += result[i].id;
+                    html += '-more">';
+
+
+//                    Действия с записью таблицы
+                    html += '<ul class="aui-list-truncate">';
+                    html += '<li><a href="#" onclick="clickRow(';
+                    html += result[i].id;
+                    html += ')">$i18n.getText("tl.tutorial.view")</a></li>';
+                    html += '</div></ul></div></td>';
+
+                    html += '</tr>';
+                }
+
+//                Подставляем результат в таблицу
+                jQuery("#table").html(html);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.error("userReminderItems " + jqXHR + " " + textStatus + " " + errorThrown);
+            }
+        });
+    }
+</script>
+</body>
+</html>

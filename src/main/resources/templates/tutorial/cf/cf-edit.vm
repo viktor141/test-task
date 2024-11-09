@@ -1,0 +1,23 @@
+#disable_html_escaping()
+#customControlHeader ($action $customField.id $customField.name $fieldLayoutItem.required $displayParameters $auiparams)
+
+<input type="hidden" value="${sourceVal}" cf="$customField.id" id="sourceVal-$customField.id" class="tutorial-cf-source"/>
+
+##Выбор значения поля через список
+<select id="$customField.id" name="$customField.id" class="aui tutorial-cf" sourceCfId="${sourceVal}">
+    <option value="$!value" selected>$!value</option>
+</select>
+
+<script type='text/javascript'>
+
+//    инициализация списка
+    setupTutorialCF("$customField.id");
+    AJS.$(function () {
+        AJS.$(document).bind('dialogContentReady', function (event, dialog) {
+            //    инициализация списка при перезагрузке формы задачи
+            setupTutorialCF("$customField.id");
+        });
+    });
+</script>
+
+#customControlFooter ($action $customField.id $fieldLayoutItem.fieldDescription $displayParameters $auiparams)

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8" ?><Module><ModulePrefs title="Пример гаджета" directory_title="Пример гаджета" description="Пример гаджета" author="Teamlead" author_affiliation="Teamlead" author_location="RF, Spb" height="100" screenshot='#staticResourceUrl("ru.teamlead.plugin.jira-plugin-tutorial:products-gadget", "products-screenshot.png")' thumbnail='#staticResourceUrl("ru.teamlead.plugin.jira-plugin-tutorial:products-gadget", "products-thumb.png")'><Optional feature="gadget-directory"><Param name="categories">
+                JIRA
+            </Param></Optional><Require feature="setprefs"/><Require feature="settitle"/><Require feature="dynamic-height"/><Require feature="views"/><Optional feature="atlassian.util"/><Optional feature='auth-refresh'/><Require feature="oauthpopup"/>
+        #supportedLocales("gadget.common,gadget.text,gadget.recently.created,teamlead.crm")
+    </ModulePrefs><UserPref name="isConfigured" datatype="hidden" default_value="false"/><UserPref name="isPopup" datatype="hidden" default_value="false"/><UserPref name="refresh" datatype="hidden" default_value="false"/><UserPref name="projectOrFilterId" datatype="hidden"/><UserPref name="title" datatype="hidden" default_value=""/><UserPref name="productfield" datatype="hidden" default_value=""/><Content type="html" view="profile,canvas,home">
+        <![CDATA[
+        #requireContext("com.atlassian.jira.gadgets:autocomplete")
+        #requireContext("jira.webresources:calendar")
+        #requireContext("jira.webresources:calendar-en")
+        #requireContext("jira.webresources:calendar-ru")
+        #requireContext("com.atlassian.jira.gadgets:common-lite")
+        #requireContext("com.atlassian.auiplugin:aui-select2")
+        #requireContext("com.atlassian.auiplugin:aui-date-picker")
+        #includeResources()
+
+        <script type="text/javascript">
+          gadgets.window.setTitle("test");
+
+          AJS.Gadget({
+            baseUrl: "__ATLASSIAN_BASE_URL__",
+
+
+            config: {
+                descriptor: function (args)
+                {
+                    var gadget = this;
+                    var prefix = "g-";
+
+                    var searchParam ;
+                    if (/^jql-/.test(this.getPref("projectOrFilterId")) || this.getPref("isPopup") === "true")
+                    {
+                        searchParam =
+                        {
+                            userpref: "projectOrFilterId",
+                            type: "hidden",
+                            value: gadgets.util.unescapeString(this.getPref("projectOrFilterId"))
+                        };
+                    }
+                    else
+                    {
+                        searchParam = AJS.gadget.fields.projectOrFilterPicker(gadget, "projectOrFilterId", args.options);
+                    }
+
+                    var gadgetParams = {
+                        action: "/rest/tutorial-rest/latest/tutorial/pvalidate",
+                        theme : function()
+                        {
+                            if (gadgets.window.getViewportDimensions().width < 450){
+                                return "gdt top-label";
+                            }
+                            else
+                            {
+                              return "gdt";
+                            }
+                        }(),
+                        fields:
+
+                        [
+
+
+                        {
+                                id: "title",
+                                userpref: "title",
+                                label: gadget.getMsg("gadget.text.field.title"),
+                                description:gadget.getMsg("gadget.text.field.title.description"),
+                                type: "text",
+                                value: gadget.getPref("title")
+                            },
+
+
+                            searchParam,
+
+
+                            AJS.gadget.fields.nowConfigured()
+
+                        ]
+                    };
+
+                    setTimeout(function () {
+                       gadget.resize();
+                    }, 500);
+
+                    return gadgetParams;
+                }
+            },
+
+
+
+            view: {
+                enableReload: true,
+                onResizeReload: true,
+
+
+                template: function (args) {
+
+                    var gadget = this;
+                    this.getView().addClass("chart").empty();
+
+                    gadget.getView().addClass("g-text");
+
+                    var changedTitle = gadget.getPref("title");
+
+                       if( changedTitle && changedTitle != "" ) {
+                                gadgets.window.setTitle(changedTitle.replace(/[\+]/g, " "));
+                       } else {
+                                gadgets.window.setTitle(gadget.getMsg("gadget.text.title"));
+                       }
+
+
+                    var requiresTitle = function() {
+                        return args.chart.projectOrFilterName && args.chart.projectOrFilterName !== "" && args.chart.projectOrFilterName !== "gadget.common.anonymous.filter" && gadget.getPref("isPopup") === "false";
+                    };
+
+                    console.log("args.chart.projectOrFilterName: " + args.chart.projectOrFilterName + " : " + gadget.projectOrFilterName);
+
+                    gadget.projectOrFilterName = args.chart.projectOrFilterName;
+
+                    if ( requiresTitle() )
+                    {
+                        gadget.projectOrFilterName = args.chart.projectOrFilterName;
+                    }
+                    else
+                    {
+                        this.getView().html("");
+                    }
+
+                    var getChartContainer = function ()
+                    {
+                        var chart = AJS.$("<div id='chart' />").appendTo(gadget.getView());
+                        return function ()
+                        {
+                            return chart;
+                        };
+                    }();
+
+
+                    var safeEscapeString = function(text) {
+                        if(text) {
+                            return gadgets.util.escapeString(text);
+                        } else {
+                            return '';
+                        }
+                    };
+
+
+
+
+                    var dataTable = AJS.gadgets.templater.Table({
+                        descriptor: function (args)
+                        {
+
+
+                            console.log(" dataTable args " + JSON.stringify(args));
+
+
+                            return {
+
+
+                                cols: [
+                                    {
+                                        header: "имя",
+                                        preSorted: true,
+                                        sort: "asc"
+                                    },
+                                    {
+                                        header: "Select"
+                                    },
+                                    {
+                                        header: "Checked"
+                                    }
+                                ],
+
+
+
+                                data: function ()
+                                {
+                                    var rows = [];
+                                    var len = AJS.$(args.rows).length;
+
+
+                                    AJS.$(args.rows).each(function (i)
+                                    {
+
+                                        var cell = this.cell;
+                                        var cellLine = [];
+
+                                        AJS.$(cell).each(function (i) {
+                                            cellLine.push({
+                                                value: this,
+                                                label: this
+                                            });
+                                        });
+
+                                        rows.push(cellLine);
+                                    });
+
+                                    return rows;
+                                }()
+                            };
+                        },
+                        sortable: true,
+
+                        args: [
+                            {
+                                key: "rows",
+                                data: args.chart.rows
+                            }
+                        ]
+                    });
+
+                    var getDataTable = function () {
+                        return AJS.$("table.aui", gadget.getView());
+                    };
+
+                    var createCanvasDataTable = function () {
+                        dataTable.addCallback(function (fragment) {
+                            gadget.getView().append(fragment);
+                            gadget.hideLoading();
+                            gadget.resize();
+                        });
+                        dataTable.build();
+                    };
+
+                    gadget.showLoading();
+
+                    createCanvasDataTable();
+                },
+                args: [
+                    {
+                        key: "chart",
+                        ajaxOptions: function ()
+                        {
+                            var gadget = this;
+                            var idata =  {
+                                    searchFilter: gadgets.util.unescapeString(this.getPref("projectOrFilterId"))
+                            };
+                            return {
+                                url: "/rest/tutorial-rest/1.0/tutorial/products",
+                                data: idata
+                            };
+                        }
+                    }
+                ]
+            }
+          });
+        </script>
+        ]]>
+    </Content></Module>

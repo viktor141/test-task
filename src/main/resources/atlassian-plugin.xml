@@ -1,0 +1,316 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+        <param name="configure.url">/secure/admin/tutorialAdmin.jspa</param>
+        <param name="atlassian-data-center-compatible">true</param>
+    </plugin-info>
+
+    <!--модуль переводов-->
+    <resource type="i18n" name="i18n" location="tutorial"/>
+
+    <!--ресурсы javascript, css и тп-->
+    <web-resource key="tutorial-resources" name="Tutorial Web Resources">
+
+        <!--стандартные зависимости для javascript-->
+        <dependency>jira.webresources:calendar</dependency>
+        <dependency>jira.webresources:calendar-en</dependency>
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>jira.webresources:global-static</dependency>
+        <dependency>jira.webresources:jira-global</dependency>
+        <dependency>com.atlassian.auiplugin:aui-progress-indicator</dependency>
+        <dependency>com.atlassian.auiplugin:aui-experimental-progress-indicator</dependency>
+
+        <dependency>com.atlassian.auiplugin:aui-dialog2</dependency>
+
+
+        <!--макроподстановка ресурсов переводов в код javascript-->
+        <transformation extension="js">
+            <transformer key="jsI18n"/>
+        </transformation>
+
+        <resource type="download" name="tutorial.css" location="/css/tutorial.css"/>
+        <resource type="download" name="tutorial.js" location="/js/tutorial.js"/>
+
+        <!--путь к рисункам-->
+        <resource type="download" name="images/" location="/images"/>
+
+        <!--библиотека jQuery-->
+        <resource type="download" name="jquery.validate.js" location="/js/jquery.validate.js"/>
+
+        <!--Handler for table applying-->
+        <resource type="download" name="issue-table-handler.js" location="/js/issue-table-handler.js"/>
+
+        <context>atl.general</context>
+        <context>atl.admin</context>
+        <context>jira.view.issue</context>
+    </web-resource>
+
+    <!--импорт стандартных компонентов для использования в java классах-->
+    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
+    <component-import key="eventPublisher" interface="com.atlassian.event.api.EventPublisher"/>
+    <component-import key="pluginAccessor" interface="com.atlassian.plugin.PluginAccessor"/>
+    <component-import key="pluginController" interface="com.atlassian.plugin.PluginController"/>
+    <component-import key="txTemplate" interface="com.atlassian.sal.api.transaction.TransactionTemplate"/>
+    <component-import key="attachmentManager" interface="com.atlassian.jira.issue.AttachmentManager"/>
+    <component-import key="commentManager" interface="com.atlassian.jira.issue.comments.CommentManager"/>
+    <component-import key="templateRenderer" interface="com.atlassian.templaterenderer.TemplateRenderer"/>
+    <component-import key="pluginSettingsFactory"
+                      interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory"/>
+    <component-import key="loginUriProvider" interface="com.atlassian.sal.api.auth.LoginUriProvider"/>
+    <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager"/>
+    <component-import key="i18nResolver" interface="com.atlassian.sal.api.message.I18nResolver"/>
+
+    <!--страницы    -->
+    <webwork1 key="tutorial-actions" name="tutorial Actions" class="java.lang.Object">
+        <actions>
+
+            <!--админка всего плагина-->
+            <!--java класс и настройка пути-->
+            <!--/secure/admin/tutorialAdmin!default.jspa-->
+            <!--default - команда в java - метод doDefault-->
+            <action name="ru.teamlead.jira.plugins.tutorial.action.TutorialAdminAction" alias="tutorialAdmin">
+                <!--путь к файлу Velocity-->
+                <view name="success">/templates/tutorial/admin/admin.vm</view>
+            </action>
+
+            <!--/secure/TutorialAction.jspa-->
+            <!--страница с табличкой-->
+            <action name="ru.teamlead.jira.plugins.tutorial.action.TutorialAction" alias="TutorialAction">
+                <view name="success">/templates/tutorial/tutorial.vm</view>
+            </action>
+
+            <!--админка поля-->
+            <!--вызывать только с параметрами!!!!-->
+            <!--/secure/admin/PropertyAdvancedAction!default.jspa?atl_token=BTUQ-89OM-8F22-BOTM%7Cdb2a9d593fcaee2dc708f5547fcbe78e27387e3b%7Clin&fieldConfigSchemeId=10906&fieldConfigId=10906&customFieldId=10802&returnUrl=ConfigureCustomField%21default.jspa%3FcustomFieldId%3D10802-->
+            <!--из конфигурации поля-->
+            <action name="ru.teamlead.jira.plugins.tutorial.customfields.PropertyAdvancedAction"
+                    alias="PropertyAdvancedAction">
+
+                <!--разные варианты для разных представлений-->
+                <view name="input">/templates/tutorial/cf/prop-advanced.vm</view>
+                <view name="success">/templates/tutorial/cf/prop-advanced.vm</view>
+                <command name="save" alias="CommandSave">
+                    <view name="success">/templates/tutorial/cf/prop-advanced.vm</view>
+                </command>
+            </action>
+
+            <!--админка поля select-->
+            <!--вызывать только с параметрами!!!!-->
+            <!--/secure/admin/PropertySelectAdvancedAction!default.jspa?atl_token=BTUQ-89OM-8F22-BOTM%7Cdb2a9d593fcaee2dc708f5547fcbe78e27387e3b%7Clin&fieldConfigSchemeId=10906&fieldConfigId=10906&customFieldId=10802&returnUrl=ConfigureCustomField%21default.jspa%3FcustomFieldId%3D10802-->
+            <!--из конфигурации поля-->
+            <action name="ru.teamlead.jira.plugins.tutorial.customfields.PropertySelectAdvancedAction"
+                    alias="PropertySelectAdvancedAction">
+                <view name="input">/templates/tutorial/cfselect/prop-advanced.vm</view>
+                <view name="success">/templates/tutorial/cfselect/prop-advanced.vm</view>
+                <command name="save" alias="CommandSave">
+                    <view name="success">/templates/tutorial/cfselect/prop-advanced.vm</view>
+                </command>
+            </action>
+
+            <!--страница со списком задач, найденных через jql-->
+            <!--/secure/myissues.jspa-->
+            <action name="ru.teamlead.jira.plugins.tutorial.action.TutorialAction" alias="myissues">
+                <view name="success">/templates/tutorial/issues.vm</view>
+            </action>
+
+        </actions>
+    </webwork1>
+
+    <!--точка входа REST вызово-->
+    <!--/rest/tutorial-rest/latest/table/tableItems-->
+    <rest key="tutorial-rest" path="/tutorial-rest" version="1.0" name="Tutorial Rest">
+        <description>Provides rest services</description>
+    </rest>
+
+    <!--импорт компонента для работы с Active Objects-->
+    <component-import key="tutorial-ao" interface="com.atlassian.activeobjects.external.ActiveObjects">
+        <description>Access to the Active Objects service</description>
+    </component-import>
+
+    <!--описание интерфейсов - таблиц Active Objects-->
+    <!--/plugins/servlet/active-objects/tables/list-->
+    <ao key="tutorial-ao-module" name="Active Objects module">
+        <!--строки таблицы на странице-->
+        <entity>ru.teamlead.jira.plugins.tutorial.ao.Tutorialitem</entity>
+        <entity>ru.teamlead.jira.plugins.tutorial.ao.Tutorialpoint</entity>
+        <entity>ru.teamlead.jira.plugins.tutorial.ao.Propconfitem</entity>
+        <entity>ru.teamlead.jira.plugins.tutorial.ao.IssueTable</entity>
+    </ao>
+
+    <!-- Declare IssueTableService as a component -->
+    <component key="issueTableService" class="ru.teamlead.jira.plugins.tutorial.service.IssueTableService">
+        <description>This component handles issue table operations.</description>
+    </component>
+
+
+    <!--компонент плагина-->
+    <!--удобен для описания логики в одном месте-->
+    <!--может быть вызван из других плагинов и скриптов groovy-->
+    <component key="tutorial-manager" class="ru.teamlead.jira.plugins.tutorial.listener.TutorialUtilsImpl"
+               public="true">
+        <interface>ru.teamlead.jira.plugins.tutorial.listener.TutorialUtils</interface>
+    </component>
+
+    <!--слушатель событий по заадчам, пользователям и тп-->
+    <component key="tutorial-listener" name="Reminding Lstener"
+               class="ru.teamlead.jira.plugins.tutorial.listener.TutorialListener">
+        <description>Class that processes the scheduled reminding</description>
+    </component>
+
+    <!-- Event of plugin enable -->
+    <component key="pluginEventListener" class="ru.teamlead.jira.plugins.tutorial.listener.PluginEventListener"/>
+
+    <!--пункт меню в верхней панели -->
+    <web-item key="tutorial-top-menu-item" name="Tutorial Top Menu Item" section="system.top.navigation.bar">
+        <label key="tl.tutorial"/>
+        <!--ссылка на страницу-->
+        <link linkId="my-tutorial-link">/secure/TutorialAction.jspa</link>
+
+        <!--условие видимости - пользователь зашел в jira-->
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.UserLoggedInCondition"/>
+    </web-item>
+
+    <!--группа ссылок в левой панели в админке плагинов jira-->
+    <web-section key="tl-tutorial-admin" location="admin_plugins_menu" weight="160"
+                 name="Tutorial Admin Main Section">
+        <label key="admin.menu.teamlead.calendar"/>
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.UserLoggedInCondition"/>
+
+        <!--есть право admin-->
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.JiraGlobalPermissionCondition">
+            <param name="permission">admin</param>
+        </condition>
+    </web-section>
+
+    <!--пункт администрирования плагина -->
+    <!--admin_plugins_menu/tl-tutorial-admin - путь к пункту через группу -->
+    <web-item key="tutorial-admin-link" name="Tutorial Admin link"
+              section="admin_plugins_menu/tl-tutorial-admin"
+              weight="50">
+        <label key="teamlead.tutorial"/>
+
+        <!--ссылка на страницу админки плагина-->
+        <link>/secure/admin/tutorialAdmin!default.jspa</link>
+
+        <!--условие видимости в плагине-->
+        <condition class="ru.teamlead.jira.plugins.tutorial.TutorialCondition"/>
+
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.UserLoggedInCondition"/>
+        <condition class="com.atlassian.jira.plugin.webfragment.conditions.JiraGlobalPermissionCondition">
+            <param name="permission">admin</param>
+        </condition>
+    </web-item>
+
+    <!--Drop down panel and dialog window aui-dialog2-->
+    <web-panel key="issue-table-dropdown-panel" name="Issue Table Dropdown Panel" location="atl.jira.view.issue.left.context" weight="100">
+        <resource name="view" type="velocity" location="/templates/issue-table-templates/issue-table-dropdown.vm"/>
+        <context-provider class="ru.teamlead.jira.plugins.tutorial.contextproviders.IssueTableContextProvider"/>
+    </web-panel>
+
+    <!--постфункция для workflow-->
+    <workflow-function key="tutorial-post-function" name="Tutorial postfunction"
+                       i18n-name-key="tl.tutorial.post.function"
+                       class="ru.teamlead.jira.plugins.tutorial.postfunction.TutorialFunctionFactory">
+        <description key="tl.tutorial.function.desc"/>
+
+        <!--можно менять порядок следования в стеке постфункций-->
+        <orderable>true</orderable>
+
+        <!--может быть много в одном стеке-->
+        <unique>false</unique>
+
+        <!--можно удалять-->
+        <deletable>true</deletable>
+
+        <!--класс функции - непосредственно логика постфункции-->
+        <function-class>ru.teamlead.jira.plugins.tutorial.postfunction.TutorialFunction</function-class>
+
+        <!--страница Velocity для просмотра настроек постфункции-->
+        <resource type="velocity" name="view" location="templates/tutorial/postfunction/tutorialpf-view.vm"/>
+
+        <!--страница Velocity для ввода настроек постфункции-->
+        <resource type="velocity" name="input-parameters"
+                  location="templates/tutorial/postfunction/tutorialpf-input.vm"/>
+
+        <!--страница Velocity для редактирования настроек постфункции-->
+        <resource type="velocity" name="edit-parameters"
+                  location="templates/tutorial/postfunction/tutorialpf-input.vm"/>
+    </workflow-function>
+
+    <!--кастомное поле типа строка-->
+    <!--значение поля в задачах воспронимается как строка-->
+    <customfield-type key="tutorial-cf" name="Tutorial Custom field"
+                      i18n-name-key="tl.tutorial.cf"
+                      class="ru.teamlead.jira.plugins.tutorial.customfields.TutorialCFType">
+        <description key="tl.tutorial.cf.desc">
+            Tutorial Custom field
+        </description>
+
+        <!--страница Velocity для просмотра значения поля в задачах-->
+        <resource type="velocity" name="view"
+                  location="templates/tutorial/cf/cf-view.vm"/>
+
+        <!--страница Velocity для редактирования значения поля в задачах-->
+        <resource type="velocity" name="edit"
+                  location="templates/tutorial/cf/cf-edit.vm"/>
+
+        <!--страница Velocity для экспорта значения поля в задачах в xml-->
+        <resource type="velocity" name="xml" location="templates/tutorial/cf/cf-xml.vm"/>
+
+        <!--иконка поля в палитре полей в админке jira-->
+        <resource type="download" name="customfieldpreview.png" location="images/property_field.png"/>
+    </customfield-type>
+
+    <!--кастомное поле типа select-->
+    <!--значение поля типа Option-->
+    <!--https://docs.atlassian.com/software/jira/docs/api/7.6.1/com/atlassian/jira/issue/customfields/option/Option.html-->
+    <customfield-type key="tutorial-cf-select" name="Tutorial Select Custom field"
+                      i18n-name-key="tl.tutorial.cf.select"
+                      class="ru.teamlead.jira.plugins.tutorial.customfields.TutorialCFSelectType">
+        <description key="tl.tutorial.cf.select.desc">
+            Tutorial Select Custom field
+        </description>
+
+        <!--иконка поля в палитре полей в админке jira-->
+        <resource type="download" name="customfieldpreview.png" location="images/property_field.png"/>
+
+        <!--страница Velocity для просмотра значения поля в задачах-->
+        <resource type="velocity" name="view" location="templates/tutorial/cfselect/view-select.vm"/>
+        <resource type="velocity" name="edit" location="templates/tutorial/cfselect/edit-select.vm"/>
+        <resource type="velocity" name="xml" location="templates/tutorial/cfselect/xml-select.vm"/>
+
+        <!--стандартный поисковик для select поля-->
+        <valid-searcher package="com.atlassian.jira.plugin.system.customfieldtypes" key="multiselectsearcher"/>
+    </customfield-type>
+
+    <!--сервлет для выполнения действий по запросу-->
+    <!--ссылка /plugins/servlet/tutorial/importData-->
+    <!--импорт файла-->
+    <servlet name="Import data servlet" key="import-data-servlet"
+             class="ru.teamlead.jira.plugins.tutorial.servlet.ImportDataServlet">
+        <url-pattern>/tutorial/importData</url-pattern>
+    </servlet>
+
+    <servlet name="Issue data servlet" key="Issue-data-servlet"
+             class="ru.teamlead.jira.plugins.tutorial.servlet.IssueTableServlet">
+        <url-pattern>/issue-table/data</url-pattern>
+    </servlet>
+
+    <!--гаджет для отображения таблицы со страницы через Active Objects-->
+    <!--используется на рабочих столах-->
+    <gadget key="products-gadget" name="Products Report gadget" location="gadget/products-gadget.xml">
+
+        <!--роль для просмотра гаджета-->
+        <param name="roles-required">browse</param>
+
+        <!--ссылка на иконку для гаджета в палитре гаджетов-->
+        <resource type="download" name="products-screenshot.png"
+                  location="images/products-screenshot.png"/>
+
+        <resource type="download" name="products-thumb.png" location="images/products-thumb.png"/>
+    </gadget>
+</atlassian-plugin>

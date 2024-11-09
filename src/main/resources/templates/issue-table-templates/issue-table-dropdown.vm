@@ -1,0 +1,28 @@
+<select id="issueTableDropdown" name="issueTableDropdown">
+    #foreach($tableName in $issueTables)
+        <option value="$tableName">$tableName</option>
+    #end
+</select>
+
+<button id="open-dialog-button" class="aui-button aui-button-primary">Apply</button>
+
+<section
+        id="issue-table-dialog"
+        class="aui-dialog2 aui-dialog2-small aui-layer"
+        role="dialog"
+        aria-hidden="true"
+        aria-labelledby="dialog-heading"
+        hidden>
+    <header class="aui-dialog2-header">
+        <h1 class="aui-dialog2-header-main" id="dialog-heading">Apply Table Selection</h1>
+    </header>
+    <div class="aui-dialog2-content">
+        <p>Are you sure you want to apply this table selection?</p>
+    </div>
+    <footer class="aui-dialog2-footer">
+        <div class="aui-dialog2-footer-actions">
+            <button id="dialog-confirm-button" class="aui-button aui-button-primary">Apply</button>
+            <button id="dialog-cancel-button" class="aui-button aui-button-link">Cancel</button>
+        </div>
+    </footer>
+</section>

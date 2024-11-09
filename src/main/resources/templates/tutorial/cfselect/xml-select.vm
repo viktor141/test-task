@@ -1,0 +1,5 @@
+##стандартный экспорт опции поля в xml
+#disable_html_escaping()
+#if ($value)
+    <customfieldvalue key="$value.optionId"><![CDATA[$xmlutils.escapeForCdata($value.toString())]]></customfieldvalue>
+#end

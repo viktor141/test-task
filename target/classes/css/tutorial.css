@@ -1,0 +1,12 @@
+.tutorial {
+
+}
+
+.aui-sidebar[aria-expanded="false"]~.aui-page-panel, .aui-sidebar-submenu[aria-expanded="false"]~.aui-page-panel {
+    padding-left: 56px;
+}
+
+.aui-sidebar~.aui-page-panel, .aui-sidebar-submenu~.aui-page-panel {
+    margin-top: 0;
+    padding-left: 280px;
+}

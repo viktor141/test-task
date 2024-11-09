@@ -1,0 +1,80 @@
+<html>
+<body>
+<script type="text/javascript">
+    AJS.$(window).load(function () {
+        AJS.$('.aui-page-panel-nav.hidden').removeClass('hidden')
+        function find_admin_menu_links() {
+            var f1 = document.getElementsByClassName("admin-menu-links")
+            for (var i = 0; i < f1.length; i++)
+                if (i == 3) {
+                    f1[i].style.display = "";
+                }
+        }
+        find_admin_menu_links()
+    });
+</script>
+
+<form action="/plugins/servlet/tutorial/importData" class="aui" method="post" id="import-form" name="import-form"
+      enctype="multipart/form-data" target="target-iframe">
+
+##    &fieldConfigSchemeId=10402&fieldConfigId=10402&customFieldId=10302
+
+    <input type="hidden" id="customFieldId" name="customFieldId" value="${customFieldId}"/>
+    <input type="hidden" id="fieldConfigSchemeId" name="fieldConfigSchemeId" value="${fieldConfigSchemeId}"/>
+    <input type="hidden" id="fieldConfigId" name="fieldConfigId" value="${fieldConfigId}"/>
+    <input type="hidden" id="action" name="action" value=""/>
+
+    #set ($configure_field=$customFieldManager.getCustomFieldObject("customfield_${customFieldId}") )
+
+    <table class="jiraform maxWidth">
+        <tr class="titlerow">
+            <td class="jiraformheader" colspan="2">
+                <h3 class="formtitle">$i18n.getText("teamlead.crm.choose.property"): ${configure_field.name}</h3>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                File with options:
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <input type="file" id="file" name="file"/>
+            </td>
+        </tr>
+
+##        загрузка файла xml для получения опций
+        <tr class="buttons-container">
+            <td colspan="1">
+                <div class="buttons-container">
+                    <div class="buttons">
+                        <input type="submit"
+                               name="Save"
+                               id="Save"
+                               value="Load"
+                               accesskey="S"
+                               title="Press Ctrl+S to submit form"
+                               class="aui-button "/>
+
+                        <input class="aui-button" type="button" value="$i18n.getText("tl.tutorial.cancel")"
+                               onclick="location.href='ConfigureCustomField!default.jspa?customFieldId=${customFieldId}'">
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<iframe frameborder='no' style='display: none' width='1'
+        height='1'
+        id="target-iframe"
+        name="target-iframe"></iframe>
+
+<script type='text/javascript'>
+    jQuery(window).load(function () {
+    });
+</script>
+</body>
+</html>

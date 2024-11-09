@@ -1,0 +1,30 @@
+/* Basic styling for the dropdown */
+#issueTableDropdown {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f4f5f7; /* Matches JIRA's background */
+    color: #333; /* Text color */
+    margin-top: 10px; /* Add some space above */
+}
+
+/* Styling for when the dropdown is in focus */
+#issueTableDropdown:focus {
+    border-color: #4c9aff; /* JIRA’s blue accent color */
+    box-shadow: 0 0 5px rgba(76, 154, 255, 0.5);
+    outline: none;
+}
+
+/* Optional: Custom styling for dropdown options */
+#issueTableDropdown option {
+    padding: 5px;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Add a subtle hover effect for better UX */
+#issueTableDropdown option:hover {
+    background-color: #ebecf0;
+}

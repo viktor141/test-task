@@ -1,0 +1,158 @@
+<!-- AUI Sidebar -->
+##верстка меню слева
+<div class="aui-sidebar" aria-expanded="false">
+    <div class="aui-sidebar-wrapper">
+        <div class="aui-sidebar-body">
+            <header class="aui-page-header" style="width: auto;">
+                <div class="aui-page-header-inner">
+                    <div class="aui-page-header-image">
+                        <span class="aui-avatar aui-avatar-large aui-avatar-project">
+                            <span class="aui-avatar-inner">
+##                                иконка
+                                <img src="${jiraBaseUrl}/download/resources/ru.teamlead.plugin.jira-plugin-tutorial:tutorial-resources/images/pluginIcon.png"
+                                     alt="Tutorial"></span>
+                        </span>
+                    </div>
+##                    заголовок
+                    <div class="aui-page-header-main">
+                        <h1>Tutorial</h1>
+                    </div>
+                </div>
+            </header>
+            <nav class="aui-navgroup aui-navgroup-vertical">
+                <div class="aui-navgroup-inner">
+                    <div class="aui-sidebar-group aui-sidebar-group-tier-one">
+
+##                        пункты меню
+                        <ul class="aui-nav" title="Tutorial actions">
+                            <li>
+                                <a class="crm-action aui-nav-item" title="$i18n.getText("tl.tutorial.add")"
+                                   id="add-record"
+                                   style="display: none">
+                                    <span class="aui-icon aui-icon-large aui-iconfont-add"></span>
+                                    <span id="add-record-caption" class="aui-nav-item-label">$i18n.getText(
+                                        "tl.tutorial.add")</span>
+                                </a>
+                            </li>
+
+##                            пункт меню
+                            <li>
+                                <a class="crm-action aui-nav-item"
+                                   title="$i18n.getText("tl.tutorial.remove")"
+                                   style="display: none"
+                                   id="remove-button">
+                                    <span class=" aui-icon aui-icon-large aui-iconfont-remove"></span>
+                                        <span id="remove-caption" class="aui-nav-item-label">$i18n.getText(
+                                            "tl.tutorial.remove")</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="aui-sidebar-group aui-sidebar-group-tier-one">
+                        <div class="aui-nav-heading" title="Tutorial">
+                            <strong>Tutorial functions</strong>
+                        </div>
+
+##                        группа пунктов меню
+                        <ul class="aui-nav">
+                            <li id="tutorial-item-1" class="">
+                                <a class="aui-nav-item"
+                                   href="${jiraBaseUrl}/secure/tutorialAdmin.jspa"
+                                   title="$i18n.getText("tl.tutorial.item.one")">
+                                    <span class="aui-icon aui-icon-small aui-iconfont-link"></span>
+                                    <span class="aui-nav-item-label">$i18n.getText("tl.tutorial.item.one")</span>
+                                </a>
+                            </li>
+
+                            <li id="tutorial-item-2" class="">
+                                <a class="aui-nav-item" href="${jiraBaseUrl}/secure/tutorialAdmin.jspa"
+                                   title="$i18n.getText("tl.tutorial.item.two")">
+                                    <span class="aui-icon aui-icon-small aui-iconfont-blogroll"></span>
+                                                    <span class="aui-nav-item-label">$i18n.getText(
+                                                        "tl.tutorial.item.two")</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="aui-sidebar-group aui-sidebar-group-tier-one">
+                        <div class="aui-nav-heading"></div>
+                        <ul class="aui-nav">
+                            <li>
+                                <a class="aui-nav-item"
+                                   href="https://www.teamlead.ru/display/EN/Contact+Us"
+                                   target="_blank"
+                                   title="$i18n.getText("tl.tutorial.help")">
+                                    <span class="aui-icon aui-icon-small aui-iconfont-hipchat"></span>
+                                                    <span class="aui-nav-item-label">$i18n.getText(
+                                                        "tl.tutorial.help")</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+##        нижний пункт меню
+        <div class="aui-sidebar-footer">
+            <a id="crm-admin-link-op"
+               href="${jiraBaseUrl}/secure/admin/tutorialAdmin.jspa"
+               target="_blank"
+               class="aui-button aui-button-subtle aui-sidebar-settings-button"
+               data-tooltip="$i18n.getText("tl.tutorial.configure")"
+               title="$i18n.getText("tl.tutorial.configure")" original-title="$i18n.getText("tl.tutorial.configure")">
+                <span class="aui-icon aui-icon-small aui-iconfont-configure"></span>
+                <span class="aui-button-label">$i18n.getText("tl.tutorial.configure")</span>
+            </a>
+
+            <a class="aui-button aui-button-subtle aui-sidebar-toggle aui-sidebar-footer-tipsy"
+               title="Collapse sidebar">
+                <span class="aui-icon aui-icon-large"></span>
+            </a>
+        </div>
+    </div>
+</div>
+<!-- end AUI Sidebar -->
+
+<script type="text/javascript">
+    var jQuery = AJS.$;
+
+    function parseBool(val) {
+        return val === true || val === "true"
+    }
+
+//    инициализация меню
+    AJS.toInit(function () {
+        var sidebar = AJS.sidebar('.aui-sidebar');
+
+        if (jQuery.localStorage) {
+            var crmSidebarIsExpanded = jQuery.localStorage.get('crmSidebarIsExpanded');
+
+            if (sidebar.isCollapsed()) {
+                if (crmSidebarIsExpanded) {
+                    sidebar.expand();
+                }
+            }
+            else {
+                if (!crmSidebarIsExpanded) {
+                    sidebar.collapse();
+                }
+            }
+        }
+
+//        перехват событий
+        sidebar.on('collapse-start', function () {
+        });
+
+        sidebar.on('collapse-end', function () {
+        });
+
+        sidebar.on('expand-start', function () {
+        });
+
+        sidebar.on('expand-end', function () {
+        });
+    });
+</script>

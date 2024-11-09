@@ -1,0 +1,263 @@
+##Страница админки плагина
+<html>
+<head>
+    <title>$i18n.getText("tl.tutorial.admin")</title>
+</head>
+<body>
+    $webResourceManager.requireResourcesForContext("com.atlassian.auiplugin:aui-experimental-restfultable")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar-en")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jira-global")
+    $webResourceManager.requireResourcesForContext("jira.webresources:autocomplete")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jqlautocomplete")
+
+## проверка прав
+    #if(${neededPermissions})
+    <div class="mod-content">
+        <h2>$i18n.getText("tl.tutorial.admin")</h2>
+
+    ##        Форма настроек
+        <form action="#" method="post" id="d1" class="aui">
+            <fieldset>
+                <div class="field-group">
+
+                ##                    Поле настройки
+                    <label for="d-fname">Default field<span class="aui-icon icon-required"> required</span></label>
+                    <input class="text" type="text" id="d-fname" name="d-fname" title="first name">
+
+                    <div class="description">Default width input of a required field</div>
+                </div>
+
+
+                <div class="field-group">
+                    <label for="startDateCF">Start</label>
+
+                    <select id="startDateCF" class="select" style="width: 200px">
+                        <option value=""></option>
+                        #foreach($customField in $dateCustomFields)
+                            <option value="${customField.id}"
+                                #if($startDateCFVal == $customField.id)
+                                    selected
+                                #end
+                                    >
+                                ${customField.name}
+                            </option>
+                        #end
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="endDateCF">Finish</label>
+
+                    <select id="endDateCF" class="select" style="width: 200px">
+                        <option value=""></option>
+                        #foreach($customField in $dateCustomFields)
+                            #if ($customField.id != $startDateCFVal)
+                                <option value="${customField.id}"
+                                    #if($endDateCFVal == $customField.id)
+                                        selected
+                                    #end
+                                        >
+                                    ${customField.name}
+                                </option>
+                            #end
+                        #end
+                    </select>
+                </div>
+            </fieldset>
+
+            <div class="buttons-container">
+                <div class="buttons">
+
+                ##                    Кнопка сабмита формы и сохранения настроек
+                    <input class="button submit" type="button" value="Save" id="d-save-btn1">
+
+                    <a class="cancel" href="#">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script type='text/javascript'>
+        function tutorialSet() {
+            var data = {
+                val: jQuery("#d-fname").val(),
+                start: jQuery("#startDateCF").val(),
+                finish: jQuery("#endDateCF").val()
+            };
+
+            console.log("tutorialSet1");
+            console.error("tutorialSet2");
+
+//            Сохраняем настройки через вызов REST
+            jQuery.ajax({
+                method: "get",
+                dataType: "json",
+                data: data,
+                url: AJS.contextPath() + "/rest/tutorial-rest/1.0/tutorial/setSettings",
+                success: function (result, textStatus, jqXHR) {
+                    if (result.success) {
+
+//                        Выводим сообщение
+
+                        JIRA.Messages.showSuccessMsg("$i18n.getText("tl.tutorial.saved")");
+
+
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    JIRA.Messages.showErrorMsg("$i18n.getText("tl.tutorial.error")");
+                }
+            });
+        }
+
+        jQuery(document).ready(function () {
+
+
+//            Вешаем метод на кнопку
+            jQuery("#d-save-btn1").click(function () {
+                var popup = new AJS.Dialog(
+                        500, 170, 'aui-save-dialog-cnt'
+                );
+
+
+//                Диалог с подтверждением сохранения
+                var confirm = '$i18n.getText("tl.tutorial.save.confirm")';
+                popup.addHeader('$i18n.getText("tl.tutorial.save")');
+                popup.addButton('$i18n.getText("tl.tutorial.save")', function (dialog) {
+                    popup.hide();
+                    dialog.hide();
+                    tutorialSet();
+                }, 'aui-save-yes-button');
+                popup.addLink('$i18n.getText("tl.tutorial.cancel")', function (dialog) {
+                    popup.hide();
+                    dialog.hide();
+                    jQuery("#aui-save-dialog-cnt").remove();
+                    jQuery(".aui-save-dialog-cnt").remove();
+                }, 'aui-save-no-button');
+
+                popup.addPanel("1", "<div>" + confirm + "</div>", "panel-body");
+
+                jQuery("#aui-save-dialog-cnt .dialog-title").css("background-color", "#d04437");
+                jQuery("#aui-save-dialog-cnt .dialog-title").css("color", "#fff");
+
+                popup.show();
+            });
+
+//            Запрос настроек через REST
+            jQuery.ajax({
+                method: "get",
+                data: {all: true},
+                dataType: "json",
+                url: AJS.contextPath() + "/rest/tutorial-rest/latest/tutorial/getSettings",
+                success: function (result, textStatus, jqXHR) {
+
+//                    Проставляем значение поля
+                    jQuery("#d-fname").val(result.val);
+
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("error " + jqXHR + " " + textStatus + " " + errorThrown);
+                }
+            });
+
+
+            var elS = AJS.$("#startDateCF");
+            var elE = AJS.$("#endDateCF");
+            new AJS.SingleSelect({
+                handleFreeInput: function (value) {
+                },
+                errorMessage: "",
+                width: elS.width(),
+                element: elS,
+                itemAttrDisplayed: "label",
+                showDropdownButton: true,
+                ajaxOptions: {
+                    data: function (query) {
+                        return {
+                            query: query
+//                            exclude: elS.val(),
+//                            exclude1: elE.val()
+                        }
+                    },
+
+                    url: contextPath + "/rest/tutorial-rest/latest/tutorial/dateFields",
+                    query: true, // keep going back to the sever for each keystroke
+                    formatResponse: function (data) {
+                        var ret = [];
+
+                        jQuery(data).each(function (i, suggestions) {
+                            var groupDescriptor = new AJS.GroupDescriptor({
+                                weight: i, // order or groups in suggestions dropdown
+                                label: suggestions.header
+                            });
+                            jQuery(suggestions.groups).each(function () {
+                                groupDescriptor.addItem(new AJS.ItemDescriptor({
+                                    value: this.name, // value of item added to select
+                                    label: this.html, // title of lozenge
+                                    html: this.html,
+                                    highlighted: true
+                                }));
+                            });
+
+                            ret.push(groupDescriptor);
+                        });
+
+                        return ret;
+                    }
+                }
+            });
+
+            new AJS.SingleSelect({
+                handleFreeInput: function (value) {
+                },
+                errorMessage: "",
+                width: elE.width(),
+                element: elE,
+                itemAttrDisplayed: "label",
+                showDropdownButton: true,
+                ajaxOptions: {
+                    data: function (query) {
+                        return {
+                            query: query
+//                            exclude: elE.val(),
+//                            exclude1: elS.val()
+                        }
+                    },
+
+                    url: contextPath + "/rest/tutorial-rest/latest/tutorial/dateFields",
+                    query: true, // keep going back to the sever for each keystroke
+                    formatResponse: function (data) {
+                        var ret = [];
+
+                        jQuery(data).each(function (i, suggestions) {
+                            var groupDescriptor = new AJS.GroupDescriptor({
+                                weight: i, // order or groups in suggestions dropdown
+                                label: suggestions.header
+                            });
+                            jQuery(suggestions.groups).each(function () {
+                                groupDescriptor.addItem(new AJS.ItemDescriptor({
+                                    value: this.name, // value of item added to select
+                                    label: this.html, // title of lozenge
+                                    html: this.html,
+                                    highlighted: true
+                                }));
+                            });
+
+                            ret.push(groupDescriptor);
+                        });
+
+                        return ret;
+                    }
+                }
+            });
+
+        });
+    </script>
+    #else
+    <div style="margin-top: 20px; margin-left: 20px; margin-bottom: 20px;">
+
+    </div>
+    #end
+</body>
+</html>

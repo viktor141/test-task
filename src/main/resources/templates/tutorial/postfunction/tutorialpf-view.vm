@@ -1,0 +1,2 @@
+##Связанное поле
+$i18n.getText("tl.tutorial.field.value.source"): ${sourceFieldName}

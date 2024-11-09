@@ -1,0 +1,18 @@
+<tr>
+  <td class="fieldLabelArea">
+    $i18n.getText("tl.tutorial.field.value.source"):
+  </td>
+  <td nowrap>
+
+##      выбор связанного поля
+      <select name='sourceField' id='sourceField'>
+      #foreach ($field in $fields)
+        #if ($field.id == ${sourceField})
+          <option selected="" value="$field.id">$field.name</option>
+        #else
+          <option value="$field.id">$field.name</option>
+        #end
+      #end
+    </select>
+  </td>
+</tr>

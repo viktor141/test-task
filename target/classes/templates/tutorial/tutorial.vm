@@ -1,0 +1,256 @@
+##Velocity страницы с табличкой
+<html>
+<head>
+    <title>$i18n.getText("tl.tutorial.page")</title>
+</head>
+<body style="min-width: 1000px">
+
+##подгружаем стандартные модули
+    $webResourceManager.requireResourcesForContext("com.atlassian.auiplugin:aui-experimental-restfultable")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar")
+    $webResourceManager.requireResourcesForContext("jira.webresources:calendar-en")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jira-global")
+    $webResourceManager.requireResourcesForContext("jira.webresources:autocomplete")
+    $webResourceManager.requireResourcesForContext("jira.webresources:jqlautocomplete")
+    $webResourceManager.requireResourcesForContext("com.atlassian.auiplugin:aui-sidebar")
+
+<div class="mod-content">
+
+##    включаем меню
+    #parse("/templates/tutorial/sidebar-menu.vm")
+
+    <div class="aui-page-panel">
+        <div class="aui-page-panel-inner">
+            <div class="aui-page-panel-content">
+                <div class="form-body" style="margin-bottom: 20px; margin-top: 20px;">
+                    <h2>$i18n.getText("tl.tutorial.table")</h2>
+                    <hr/>
+
+##                    табличка
+                    <table id="table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type='text/javascript'>
+    jQuery(document).ready(function () {
+//        когда DOM модель страницы в браузере готова - инициализируем табличку
+        initTable();
+    });
+
+//    поле списка в классе Backbone - режим редактирования
+    var selectEditView = AJS.RestfulTable.CustomEditView.extend({
+        render: function () {
+            var selectVal = this.model.get('select');
+            var html = "";
+            html += '<select id="select" name="select" class="select">';
+
+            var items = [{id: 1, name: 'option1'}, {id: 2, name: 'option2'}];
+
+//    готовим пугкты списка
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                html += '<option role="option" value="';
+                html += item.id;
+                html += '"';
+
+                if (selectVal == item.id) {
+                    html += ' selected="selected" ';
+                }
+
+                html += '>';
+                html += item.name;
+                html += '</option>';
+            }
+
+            html += '</select>';
+
+            return html;
+        }
+    });
+
+    //    поле списка в классе Backbone - режим просмотра
+    var selectReadView = AJS.RestfulTable.CustomReadView.extend({
+        render: function () {
+            var selectName = this.model.get('selectName');
+            var html = selectName;
+            return html;
+        }
+    });
+
+//    поле чекбокс - режим просмотра
+    var checkboxReadView = AJS.RestfulTable.CustomEditView.extend({
+        render: function () {
+
+            //    получаем значение поля из модели записи по id
+            var checkboxVal = this.model.get('checkbox');
+
+            var val = false;
+            if (checkboxVal) {
+                val = checkboxVal;
+            }
+
+            var html = '';
+            html += '<input disabled="true" readonly="true" type="checkbox" ';
+
+            if (val) {
+                html += ' checked="true" ';
+            }
+
+            html += '/>';
+
+            return html;
+        }
+    });
+
+    //    поле чекбокс - режим редактирвоания
+    var checkboxEditView = AJS.RestfulTable.CustomReadView.extend({
+        render: function () {
+            var id = this.model.get('id');
+            var checkboxVal = this.model.get('checkbox');
+            var val = false;
+            if (checkboxVal) {
+                val = checkboxVal;
+            }
+
+            var elId = 'checkbox-';
+            if (id) {
+                elId += id;
+            } else {
+                elId += 'create';
+            }
+
+            var text = '';
+            text += '<input type="checkbox" value="true" id="';
+            text += elId;
+            text += '" name="checkbox" ';
+
+            if (val) {
+                text += ' checked="true" ';
+            }
+
+            text += '/>';
+
+            return text;
+        }
+    });
+
+//    пустой клик
+    function clickButton(id) {
+        alert(id);
+    }
+
+//    модель записи таблицы
+    var EditRow = AJS.RestfulTable.EditRow.extend({
+        mapSubmitParams: function (params) {
+            var data = {};
+
+//            данные из записис таблицы
+            data.name = params.name;
+            data.select = params.select;
+
+//            значение чекбокса
+            var checkboxId = "checkbox-";
+            var id = this.model.attributes.id;
+            if (id) {
+                checkboxId += this.model.attributes.id;
+            } else {
+                checkboxId += "create";
+            }
+            var checkboxF = jQuery("#table" + " #" + checkboxId);
+            data.checkbox = false;
+            if (checkboxF.is(':checked')) {
+                data.checkbox = true;
+            }
+
+//            вернули данные для REST
+            return data;
+        }
+    });
+
+//    ячейка типа кнопка
+    var buttonReadView = AJS.RestfulTable.CustomReadView.extend({
+        render: function () {
+            var id = this.model.id;
+            var html = "<input type=\"button\" style=\"float:right;\" value=\"$i18n.getText(
+                        "tl.tutorial.button")\" class=\"aui-button\" onclick=\"clickButton(" + id + ")\"> ";
+            return html;
+        }
+    });
+
+    function initTable() {
+
+//        описываем таблицу
+        var table = new AJS.RestfulTable({
+
+//            ссылка на html таблицу
+            el: jQuery("#table"),
+
+//            права
+            allowReorder: true,
+            allowDelete: true,
+            allowCreate: true,
+            allowEdit: true,
+
+//            ресурсы REST
+            resources: {
+
+//                список записей
+                all: AJS.contextPath() + "/rest/tutorial-rest/latest/table/tableItems",
+
+//                операции с записями
+                self: AJS.contextPath() + "/rest/tutorial-rest/latest/table"
+            },
+
+//            колонки
+            columns: [
+//                    поле типа текст
+                {
+//                    id должно совпадать с используемым в REST
+                    id: "name",
+                    header: '$i18n.getText("tl.tutorial.name")',
+                    emptyText: '$i18n.getText("tl.tutorial.name")'
+                },
+
+//                    поле типа список
+                {
+                    id: "select",
+                    header: '$i18n.getText("tl.tutorial.select")',
+                    styleClass: "custom-apps-restfultable-displayname",
+                    emptyText: '$i18n.getText("tl.tutorial.select")',
+
+//                    модели рендеринга для режимов
+                    readView: selectReadView,
+                    editView: selectEditView
+                },
+
+//                    поле типа чекбокс
+                {
+                    id: "checkbox",
+                    styleClass: "project-config-role-groups",
+                    header: '$i18n.getText("tl.tutorial.checkbox")',
+                    emptyText: '$i18n.getText("tl.tutorial.checkbox")',
+
+                    readView: checkboxReadView,
+                    editView: checkboxEditView
+                },
+
+//                    кнопка
+                {
+                    id: 'button',
+                    header: "",
+                    readView: buttonReadView,
+                    allowEdit: false
+                }
+            ],
+            noEntriesMsg: '$i18n.getText("tl.tutorial.empty")',
+            views: {
+                editRow: EditRow
+            }
+        });
+    }
+</script>
+</body>
+</html>
