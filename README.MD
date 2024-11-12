@@ -2,7 +2,6 @@
 
 ru.teamlead.jira.plugins.tutorial.ao.IssueTable
 ru.teamlead.jira.plugins.tutorial.contextproviders.IssueTableContextProvider
-ru.teamlead.jira.plugins.tutorial.listener.PluginEventListener
 ru.teamlead.jira.plugins.tutorial.rest.IssueTableRest
 ru.teamlead.jira.plugins.tutorial.service.IssueTableService
 ru.teamlead.jira.plugins.tutorial.servlet.IssueTableServlet

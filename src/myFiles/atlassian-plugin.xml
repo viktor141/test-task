@@ -1,0 +1,46 @@
+<!--Все внесенные изменения в atlassian-plugin-->
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
+        <param name="configure.url">/secure/admin/tutorialAdmin.jspa</param>
+        <param name="atlassian-data-center-compatible">true</param>
+    </plugin-info>
+
+    <!--ресурсы javascript, css и тп-->
+    <web-resource key="tutorial-resources" name="Tutorial Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        <dependency>com.atlassian.auiplugin:aui-dialog2</dependency>
+
+        <!--Handler for table applying-->
+        <resource type="download" name="issue-table-handler.js" location="/js/issue-table-handler.js"/>
+
+        <context>jira.view.issue</context>
+    </web-resource>
+
+
+    <ao key="tutorial-ao-module" name="Active Objects module">
+        <entity>ru.teamlead.jira.plugins.tutorial.ao.IssueTable</entity>
+    </ao>
+
+    <!-- Declare IssueTableService as a component -->
+    <component key="issueTableService" class="ru.teamlead.jira.plugins.tutorial.service.IssueTableService">
+        <description>This component handles issue table operations.</description>
+    </component>
+
+    <!--Drop down panel and dialog window aui-dialog2-->
+    <web-panel key="issue-table-dropdown-panel" name="Issue Table Dropdown Panel" location="atl.jira.view.issue.left.context" weight="100">
+        <resource name="view" type="velocity" location="/templates/issue-table-templates/issue-table-dropdown.vm"/>
+        <context-provider class="ru.teamlead.jira.plugins.tutorial.contextproviders.IssueTableContextProvider"/>
+    </web-panel>
+
+    <!--Issue table servlet-->
+    <servlet name="Issue data servlet" key="Issue-data-servlet"
+             class="ru.teamlead.jira.plugins.tutorial.servlet.IssueTableServlet">
+        <url-pattern>/issue-table/data</url-pattern>
+    </servlet>
+
+</atlassian-plugin>

@@ -161,9 +161,6 @@
         <description>Class that processes the scheduled reminding</description>
     </component>
 
-    <!-- Event of plugin enable -->
-    <component key="pluginEventListener" class="ru.teamlead.jira.plugins.tutorial.listener.PluginEventListener"/>
-
     <!--пункт меню в верхней панели -->
     <web-item key="tutorial-top-menu-item" name="Tutorial Top Menu Item" section="system.top.navigation.bar">
         <label key="tl.tutorial"/>
@@ -295,6 +292,7 @@
         <url-pattern>/tutorial/importData</url-pattern>
     </servlet>
 
+    <!--Issue table servlet-->
     <servlet name="Issue data servlet" key="Issue-data-servlet"
              class="ru.teamlead.jira.plugins.tutorial.servlet.IssueTableServlet">
         <url-pattern>/issue-table/data</url-pattern>
